@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Borrador local - Lima Metropolitana</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.7;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      color: #1f2937;
+      background: #ffffff;
+    }
+    h1, h2, h3 {
+      color: #111827;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 2.3em;
+    }
+    h2 {
+      font-size: 1.5em;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 8px;
+    }
+    .meta {
+      color: #4b5563;
+      font-size: 0.95em;
+      margin-bottom: 18px;
+    }
+    p, li {
+      font-size: 1.02em;
+      text-align: justify;
+    }
+    img {
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      margin: 22px auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 28px 0 30px;
+      padding: 18px 12px;
+      background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+    .step {
+      min-width: 150px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.4;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .step small {
+      display: block;
+      font-weight: 400;
+      color: #4b5563;
+      margin-top: 6px;
+    }
+    .arrow {
+      font-size: 1.6em;
+      color: #6b7280;
+      font-weight: bold;
+    }
+    .method-card {
+      margin: 20px 0 26px;
+      padding: 18px 20px;
+      background: #f8fafc;
+      border-left: 4px solid #2563eb;
+      border-radius: 10px;
+      color: #1f2937;
+    }
+    .method-card strong {
+      color: #111827;
+    }
+    .caption {
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+      margin-top: -10px;
+      margin-bottom: 18px;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+    }
+    code {
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Delincuencia y vulnerabilidad social en Lima Metropolitana</h1>
+  <div class="meta">
+    Publicado por: Gianfranco Manrique Valentín<br>
+    Fecha: 20 de septiembre de 2026<br>
+    Curso: Introducción a Ciencia de Datos - Universidad Católica San Pablo
+  </div>
+
+  <p>
+    La seguridad ciudadana y la vulnerabilidad social son temas centrales en la agenda pública de Lima Metropolitana.
+    En un contexto de crecimiento urbano y desigualdad territorial, resulta relevante analizar si existe una relación
+    entre la incidencia delictiva y las condiciones de pobreza o exclusión social. Este trabajo explora patrones
+    entre distritos y años para describir diferencias territoriales y detectar asociaciones entre criminalidad y
+    vulnerabilidad socioeconómica.
+  </p>
+
+  <h2>Objetivo del estudio</h2>
+  <p>
+    El objetivo principal es describir la relación entre la tasa de delitos y la vulnerabilidad social en los distritos
+    de Lima Metropolitana. Para ello, se usan variables como población total, porcentaje de NBI, total de delitos y tasa
+    de delitos por cada 10,000 habitantes.
+  </p>
+
+  <h2>Flujo metodológico</h2>
+  <div class="pipeline">
+    <div class="step">Datos crudos<br><small>denuncias + población/NBI</small></div>
+    <div class="arrow">→</div>
+    <div class="step">Normalización<br><small>UBIGEO y distrito</small></div>
+    <div class="arrow">→</div>
+    <div class="step">Validación<br><small>tipos, nulos, consistencia</small></div>
+    <div class="arrow">→</div>
+    <div class="step">Integración<br><small>merge por UBIGEO</small></div>
+    <div class="arrow">→</div>
+    <div class="step">Agregación<br><small>distrito + año</small></div>
+    <div class="arrow">→</div>
+    <div class="step">Tasa por 10k<br><small>normalización</small></div>
+    <div class="arrow">→</div>
+    <div class="step">EDA<br><small>descriptivo y temporal</small></div>
+  </div>
+
+  <div class="method-card">
+    <strong>Resumen metodológico:</strong> el análisis combina información de denuncias policiales con indicadores demográficos
+    y socioeconómicos por distrito, con el fin de evaluar la distribución territorial de la delincuencia y su relación con la
+    vulnerabilidad social en Lima Metropolitana.
+  </div>
+
+  <h2>Recolección y preparación de datos</h2>
+  <p>
+    El estudio se construyó a partir de dos fuentes principales. La primera corresponde a los registros de denuncias policiales
+    de Lima Metropolitana, contenidos en el archivo crudo <strong>DATASET_Denuncias_Policiales_Enero 2018_Julio2026_LIMA.csv</strong>,
+    donde cada fila representa un caso reportado por mes, año, distrito y modalidad delictiva. Los campos clave incluyen
+    <strong>ANIO</strong>, <strong>MES</strong>, <strong>UBIGEO_HECHO</strong>, <strong>DISTRITO</strong>,
+    <strong>P_MODALIDADES</strong> y <strong>cantidad</strong>, lo que permite observar la distribución espacial y temporal de
+    los delitos por categoría y por zona. La segunda fuente corresponde a la información demográfica y socioeconómica del archivo
+    <strong>POBLACION_NBI_LIMA.xlsx</strong>, que reúne la población total y el porcentaje de necesidades básicas insatisfechas
+    (<strong>PORC_NBI</strong>) por distrito, usando el mismo identificador geográfico <strong>UBIGEO</strong>.
+  </p>
+
+  <p>
+    La preparación de la base implicó varias etapas. En primer lugar, se estandarizó la clave geográfica para asegurar la
+    compatibilidad entre ambas fuentes: los códigos de distrito fueron normalizados a seis dígitos con ceros a la izquierda,
+    y se revisó la consistencia entre nombres de distritos y códigos administrativos. Luego, se realizó la unión por
+    <strong>UBIGEO</strong>, integrando en una sola tabla la dimensión delictiva y la dimensión socioeconómica. Durante este
+    proceso se validaron los tipos de dato, los valores faltantes, los duplicados y las inconsistencias en la codificación,
+    además de comprobar la cobertura territorial de los distritos incluidos en la muestra.
+  </p>
+
+  <p>
+    Posteriormente, la base se transformó a una estructura agregada por distrito y año, con el objetivo de comparar la incidencia
+    delictiva entre unidades territoriales de distinta escala poblacional. Para ello, se sumaron los delitos por distrito y año,
+    se calculó el total anual de denuncias y se normalizó la variable mediante una tasa por cada 10,000 habitantes. Este paso es
+    relevante porque permite controlar el efecto del tamaño poblacional y facilita la comparación entre distritos con distinta base
+    demográfica. El año 2026 fue excluido del análisis temporal porque los datos disponibles corresponden a observaciones parciales
+    del año en curso y no son comparables con series completas de 2018 a 2025.
+  </p>
+
+  <p>
+    En términos de calidad y consistencia, se verificó que la base temporal final contenga <strong>344 observaciones</strong>,
+    equivalentes a <strong>43 distritos × 8 años completos</strong> (2018-2025), con una fila por unidad geográfica y año.
+    Además, se revisó la presencia de valores nulos, se validó la estructura de columnas y se comprobó que los indicadores de
+    población y vulnerabilidad estuvieran alineados con la clave territorial de cada distrito. Esta etapa de validación es esencial
+    para garantizar que la comparación entre distritos sea técnica y metodológicamente defensible.
+  </p>
+
+  <p>
+    La lógica de análisis también fue contrastada con evidencia institucional y con la literatura de referencia en seguridad urbana.
+    El indicador de NBI, así como los datos de pobreza territorial publicados por el <strong>INEI</strong>, muestran que la
+    vulnerabilidad social no es homogénea en Lima y que existen diferencias relevantes entre distritos, especialmente en materia
+    de acceso a servicios básicos, condiciones habitacionales y estructura socioeconómica. Por su parte, los reportes del
+    <strong>Ministerio del Interior</strong> y los observatorios de seguridad ciudadana suelen documentar que la incidencia delictiva
+    también presenta una distribución geográfica muy heterogénea, concentrada en ciertos distritos y zonas dentro de la metrópoli.
+    Esta consistencia territorial es la base para evaluar una relación entre vulnerabilidad social y delincuencia, siempre con un
+    enfoque descriptivo y no causal.
+  </p>
+
+  <p>
+    Asimismo, la evidencia internacional sobre seguridad urbana y desigualdad territorial es compatible con este tipo de análisis:
+    la concentración de pobreza, la fragmentación urbana y la desigualdad de condiciones de vida suelen correlacionarse con una
+    mayor exposición a riesgos sociales y de seguridad, pero no en forma determinista ni uniforme para todos los contextos. Por
+    ende, el estudio se presenta como una exploración de patrones territoriales y asociaciones descriptivas, y no como evidencia
+    de causalidad directa. Esta prudencia metodológica es central para evitar interpretaciones exageradas y mantener la validez
+    del análisis dentro de un enfoque de ciencia de datos exploratoria.
+  </p>
+
+  <pre><code>TASA_DELITOS_10K = (TOTAL_DELITOS / POBLACION_TOTAL) * 10000</code></pre>
+
+  <p>
+    La variable <strong>TASA_DELITOS_10K</strong> se construyó como una <strong>incidence rate</strong> o <strong>crude rate</strong>
+    ajustada por población, también denominada <strong>population-adjusted rate</strong> o <strong>rate per 10,000 inhabitants</strong>.
+    Este procedimiento permite transformar un conteo absoluto de delitos en una medida relativa al tamaño poblacional de cada
+    distrito, con el fin de comparar unidades geográficas con distinta base demográfica de manera más objetiva y homogénea.
+  </p>
+
+  <p>
+    Formalmente, la métrica se expresa como <strong>crime rate per 10,000 population</strong>:
+    <code>crime_rate_per_10k = (total_crimes / total_population) * 10000</code>.
+    Este enfoque es ampliamente utilizado en estudios demográficos y de seguridad ciudadana, ya que elimina el efecto de la
+    escala poblacional y facilita la comparación entre distritos con diferente magnitud poblacional dentro del análisis exploratorio.
+  </p>
+
+  <h3>Pipeline técnico ejecutado</h3>
+  <pre><code># 1) Estandarizar claves geográficas
+for col in ['UBIGEO_HECHO', 'UBIGEO']:
+    df[col] = df[col].astype(str).str.zfill(6)
+
+# 2) Unir denuncias con población y NBI
+merged = df_sidpol.merge(df_poblacion, left_on='UBIGEO_HECHO', right_on='UBIGEO', how='left')
+
+# 3) Validación de integridad
+nulos_poblacion = merged['POBLACION_TOTAL'].isna().sum()
+nulos_nbi = merged['PORC_NBI'].isna().sum()
+
+# 4) Agregar por distrito y año
+agregado = merged.groupby(['UBIGEO', 'ANIO', 'DISTRITO', 'POBLACION_TOTAL', 'PORC_NBI', 'P_MODALIDADES'], as_index=False)['cantidad'].sum()
+
+# 5) Pivot por modalidades
+datos_temporales = agregado.pivot_table(
+    index=['UBIGEO', 'ANIO', 'DISTRITO', 'POBLACION_TOTAL', 'PORC_NBI'],
+    columns='P_MODALIDADES',
+    values='cantidad',
+    aggfunc='sum',
+    fill_value=0
+).reset_index()
+
+# 6) Calcular total de delitos y tasa por cada 10,000 habitantes
+datos_temporales['TOTAL_DELITOS'] = datos_temporales[modalidades].sum(axis=1)
+datos_temporales['TASA_DELITOS_10K'] = (datos_temporales['TOTAL_DELITOS'] / datos_temporales['POBLACION_TOTAL']) * 10000</code></pre>
+
+  <pre><code># Verificación final del dataset temporal
+print(f'Dimensiones: {datos_temporales.shape[0]} filas x {datos_temporales.shape[1]} columnas')
+print(f'Años incluidos: {sorted(datos_temporales["ANIO"].unique())}')
+print(f'Distritos únicos: {datos_temporales["UBIGEO"].nunique()}')
+print(f'Valores nulos: {datos_temporales.isnull().sum().sum()}')
+</code></pre>
+
+  <h3>Validación contextual y comprobación de dirección del análisis</h3>
+  <p>
+    La evidencia externa no solo respalda la pertinencia de comparar seguridad y vulnerabilidad, sino que también ayuda a validar
+    que la orientación del estudio está en una dirección metodológicamente sólida. La geografía de la pobreza y la geografía de la
+    delincuencia no suelen ser aleatorias: los distritos con mayor exclusión social, precariedad habitacional y menor acceso a
+    servicios suelen acumular mayores niveles de riesgo y presión social. Sin embargo, esta relación es necesariamente compleja:
+    no todos los distritos con alta vulnerabilidad muestran la misma incidencia delictiva y, por ello, la asociación debe tratarse
+    con cautela y ser interpretada como descriptiva, no determinista.
+  </p>
+
+  <p>
+    En este sentido, la comparación con fuentes institucionales y la literatura de seguridad urbana ayuda a sostener que la relación
+    observada no es un artefacto del análisis, sino un patrón compatible con el contexto territorial peruano y con la evidencia
+    internacional. Lo importante es que el estudio reconoce el límite de la metodología: la información revisada permite identificar
+    patrones, comparar distritos y sugerir hipótesis, pero no sustituye análisis más profundos con variables contextuales, factores
+    de oportunidad, densidad poblacional, violencia interpersonal o dinámicas locales específicas.
+  </p>
+
+  <h2>Exploración univariada</h2>
+  <p>
+    La exploración inicial revela una marcada variabilidad entre distritos. La distribución de la tasa de delitos y del
+    total de delitos presenta extensión hacia la derecha, con observaciones altas que reflejan distritos con mayor incidencia.
+  </p>
+
+  <img src="results/eda/distribuciones_univariadas.png" alt="Distribuciones univariadas" />
+  <div class="caption">Distribución de variables clave: población, porcentaje de NBI, total de delitos y tasa por 10,000 habitantes.</div>
+
+  <img src="results/eda/boxplots_outliers.png" alt="Boxplots para detectar outliers" />
+  <div class="caption">Boxplots para identificar valores atípicos y rangos de variación entre distritos.</div>
+
+  <h2>Análisis temporal</h2>
+  <p>
+    El análisis temporal muestra que la criminalidad y la vulnerabilidad no son constantes entre años. Existen cambios
+    relevantes en la serie, y estos patrones permiten observar diferencias en la evolución del problema a lo largo del tiempo.
+  </p>
+
+  <img src="results/eda/analisis_temporal.png" alt="Análisis temporal" />
+  <div class="caption">Evolución anual de delitos, tasa, población y porcentaje de NBI.</div>
+
+  <h2>Resultados descriptivos clave</h2>
+  <p>
+    A partir de las estadísticas descriptivas, la tasa promedio de delitos por cada 10,000 habitantes es de 313.7, con una
+    mediana de 274.0 y un máximo de 1161.69. El porcentaje promedio de NBI es 13.88%, con un máximo de 37.8%.
+    Estos números muestran que la distribución es heterogénea y que existen distritos con valores claramente más altos que el promedio.
+  </p>
+
+  <img src="results/eda/scatter_nbi_vs_tasa.png" alt="Relación entre NBI y tasa de delitos" />
+  <div class="caption">Relación entre vulnerabilidad social (NBI) y tasa de delitos por cada 10,000 habitantes.</div>
+
+  <h2>Correlación entre variables clave</h2>
+  <p>
+    Para evaluar la fuerza de la asociación entre las principales métricas del estudio, se estimó la matriz de correlación de
+    Pearson entre la población total, el porcentaje de NBI, el total de delitos y la tasa de delitos por cada 10,000 habitantes.
+    En esta muestra, la correlación entre <strong>PORC_NBI</strong> y <strong>TASA_DELITOS_10K</strong> fue de <strong>-0.3129</strong>,
+    lo que indica una asociación negativa moderada y no una relación lineal positiva clara. Este resultado debe interpretarse como
+    exploratorio y descriptivo, pues no permite establecer causalidad entre vulnerabilidad social y criminalidad.
+  </p>
+
+  <img src="results/eda/matriz_correlacion.png" alt="Matriz de correlación" />
+  <div class="caption">Matriz de correlación entre variables demográficas y delictivas.</div>
+
+  <h2>Inspección multivariada</h2>
+  <p>
+    El pairplot complementa la matriz de correlación al mostrar, simultáneamente, las distribuciones marginales y las relaciones
+    bivariadas entre las variables más relevantes del análisis. Esta estrategia resulta útil para detectar patrones de agrupación,
+    heterogeneidad territorial y posibles valores atípicos entre distritos.
+  </p>
+
+  <img src="results/eda/pairplot_variables.png" alt="Pairplot de variables clave" />
+  <div class="caption">Pairplot de variables clave para la inspección multivariada por distrito.</div>
+
+  <h2>Top 10 distritos con mayor tasa</h2>
+  <p>
+    El ranking de distritos con mayor tasa de delitos por cada 10,000 habitantes permite identificar las localidades con mayor
+    intensidad de denuncias registradas en relación con su población. Este análisis aporta una perspectiva complementaria al
+    volumen absoluto, ya que distingue entre la magnitud total del problema y su intensidad relativa por unidad territorial.
+    Conviene señalar que este ranking refleja la tasa registrada en la base analizada y no debe interpretarse como un indicador
+    absoluto de riesgo social o criminalidad real en sentido causal.
+  </p>
+
+  <img src="results/eda/top10_tasa_por_distrito.png" alt="Top 10 distritos por tasa de delitos" />
+  <div class="caption">Top 10 distritos con mayor tasa de delitos registrados por cada 10,000 habitantes.</div>
+
+  <h2>Interpretación</h2>
+  <p>
+    La evidencia muestra diferencias territoriales importantes en la incidencia de denuncias registradas, así como una
+    variabilidad notable en el porcentaje de NBI y en la tasa de delitos por cada 10,000 habitantes. Sin embargo, la
+    asociación entre vulnerabilidad social y tasa delictiva no es uniforme ni necesariamente positiva en toda la muestra.
+    En este conjunto analizado, la correlación entre porcentaje de NBI y tasa de delitos fue negativa moderada (-0.3129),
+    por lo que la relación debe entenderse como descriptiva y no causal.
+  </p>
+
+  <p>
+    En otras palabras, el problema no afecta de manera homogénea a todos los distritos: existen zonas que presentan simultáneamente
+    mayores niveles de vulnerabilidad y mayor volumen de denuncias registradas, aunque la relación lineal entre ambas variables
+    no es concluyente en sentido causal. Este tipo de análisis resulta útil para orientar políticas de prevención y priorizar
+    intervenciones territoriales, pero siempre dentro de un marco descriptivo.
+  </p>
+
+  <h2>Conclusión</h2>
+  <p>
+    El análisis exploratorio realizado para Lima Metropolitana evidencia diferencias importantes entre distritos en términos de
+    denuncias registradas y vulnerabilidad social. La tasa de delitos no es homogénea ni constante, y la presencia de valores
+    extremos indica que existen localidades con tasas particularmente elevadas en comparación con el promedio. El coeficiente de
+    correlación de Pearson entre <strong>PORC_NBI</strong> y <strong>TASA_DELITOS_10K</strong> fue de <strong>-0.3129</strong>,
+    lo que sugiere una asociación negativa moderada en esta muestra. Sin embargo, esta evidencia debe interpretarse de forma
+    descriptiva y prudente, porque no permite afirmar causalidad ni generalizar el patrón a todos los distritos.
+  </p>
+
+  <p>
+    En conjunto, los resultados muestran una heterogeneidad territorial clara en la distribución de denuncias y condiciones sociales,
+    pero también destacan la necesidad de considerar otras variables contextuales para distinguir el peso real de la vulnerabilidad
+    social respecto a la criminalidad. El análisis cumple una función exploratoria y orientadora: permite identificar patrones,
+    comparar territorios y formular hipótesis de trabajo, pero no reemplaza un enfoque más profundo con indicadores contextuales,
+    geográficos y socioeconómicos adicionales. En ese sentido, puede servir como base para estudios posteriores, análisis
+    geoespaciales y modelos predictivos con una interpretación más rigurosa.
+  </p>
+
+  <h2>Fuentes de datos y bibliografía</h2>
+  <ul>
+    <li><strong>PERÚ: Población censada con al menos una necesidad básica insatisfecha, según distrito, 2017</strong><br>
+      <a href="https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1588/" target="_blank" rel="noopener noreferrer">
+        https://www.inei.gob.pe/media/MenuRecursivo/publicaciones_digitales/Est/Lib1588/
+      </a>
+    </li>
+    <li><strong>Dataset Denuncias Policiales - Enero 2018 a Julio 2026</strong><br>
+      <a href="https://www.datosabiertos.gob.pe/dataset/denuncias-policiales/resource/64c01d53-4402-4e5a-936a-4bce5b3d1008" target="_blank" rel="noopener noreferrer">
+        https://www.datosabiertos.gob.pe/dataset/denuncias-policiales/resource/64c01d53-4402-4e5a-936a-4bce5b3d1008
+      </a>
+    </li>
+    <li><strong>Censos 2025 - Población - Indicadores demográficos</strong><br>
+      <a href="https://censos2025.inei.gob.pe/resultados/descarga-de-datos/cuadros-estadisticos/tabulados/tabulados-poblacion" target="_blank" rel="noopener noreferrer">
+        https://censos2025.inei.gob.pe/resultados/descarga-de-datos/cuadros-estadisticos/tabulados/tabulados-poblacion
+      </a>
+    </li>
+    <li><strong>Indicadores demográficos – archivo Excel</strong><br>
+      <a href="https://proyectos.inei.gob.pe/dir-segmentacion-ci/postcensal/prod/adjuntos/censos-2025/descarga_datos/tabulados/00/poblacion/Indicadores_demogr%C3%A1ficos.xlsx" target="_blank" rel="noopener noreferrer">
+        https://proyectos.inei.gob.pe/dir-segmentacion-ci/postcensal/prod/adjuntos/censos-2025/descarga_datos/tabulados/00/poblacion/Indicadores_demogr%C3%A1ficos.xlsx
+      </a>
+    </li>
+  </ul>
+
+  <h2>Trabajos futuros</h2>
+  <ul>
+    <li>Comparar distritos por zona geográfica.</li>
+    <li>Agregar análisis geoespacial con mapas.</li>
+    <li>Profundizar la relación entre pobreza y criminalidad.</li>
+    <li>Crear modelos predictivos para estudiar la evolución de la delincuencia.</li>
+  </ul>
+</body>
+</html>
