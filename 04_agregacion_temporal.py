@@ -1,7 +1,8 @@
 """
 04_agregacion_temporal.py
-Agregación de datos por UBIGEO + AÑO para análisis temporal EDA
-Resultado: 344 registros (43 distritos × 8 años)
+Agregación de datos por UBIGEO + AÑO para análisis temporal EDA.
+Se excluye 2026 porque el archivo raw incluye solo observaciones parciales del año en curso.
+Resultado esperado: 344 registros (43 distritos × 8 años completos, 2018-2025).
 """
 
 import pandas as pd
@@ -16,6 +17,7 @@ print("PASO 3: AGREGACIÓN TEMPORAL (UBIGEO + AÑO)")
 print("=" * 80)
 
 datos_merged = pd.read_csv('data/clean/datos_merged.csv')
+datos_merged = datos_merged[datos_merged['ANIO'] < 2026].copy()
 print(f"\n✓ Datos merged cargados: {datos_merged.shape[0]} registros, {datos_merged.shape[1]} columnas")
 print(f"  Años disponibles: {sorted(datos_merged['ANIO'].unique())}")
 print(f"  Distritos únicos: {datos_merged['UBIGEO'].nunique()}")
@@ -102,7 +104,7 @@ print("\n" + "=" * 80)
 print("VALIDACIÓN")
 print("=" * 80)
 
-print(f"\n✓ Dimensiones esperadas: 344 registros (43 distritos × 8 años)")
+print(f"\n✓ Dimensiones esperadas: 344 registros (43 distritos × 8 años completos, 2018-2025)")
 print(f"  Dimensiones actuales: {datos_temporales.shape[0]} registros × {datos_temporales.shape[1]} columnas")
 
 # Verificar distritos por año
@@ -147,7 +149,7 @@ Datos temporales (salida):      {datos_temporales.shape[0]:,} registros
 
 Estructura:
   - 43 distritos de Lima
-  - 8 años (2018-2026)
+  - 8 años completos (2018-2025)
   - 7 modalidades de delito
   - Métricas: TOTAL_DELITOS, TASA_DELITOS_10K
   - Variables demográficas: POBLACION_TOTAL, PORC_NBI
@@ -156,7 +158,7 @@ Períodos:
   PRE-COVID:     2018-2019 ({len(datos_temporales[datos_temporales['ANIO'].isin([2018, 2019])])} registros)
   COVID PEAK:    2020-2021 ({len(datos_temporales[datos_temporales['ANIO'].isin([2020, 2021])])} registros)
   RECUPERACIÓN:  2022-2023 ({len(datos_temporales[datos_temporales['ANIO'].isin([2022, 2023])])} registros)
-  ACTUAL:        2024-2026 ({len(datos_temporales[datos_temporales['ANIO'].isin([2024, 2025, 2026])])} registros)
+  ACTUAL:        2024-2025 ({len(datos_temporales[datos_temporales['ANIO'].isin([2024, 2025])])} registros)
 
 Archivo de salida: {output_path}
 """)
